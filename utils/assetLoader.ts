@@ -49,29 +49,30 @@ const loadImage = (src: string, removeBlackBg: boolean = false): Promise<HTMLIma
 export const loadGameAssets = async (): Promise<GameAssets> => {
   // Base
   const truck = await loadImage('/game-assets/gorbage-truck-2.png', true); 
-  const ground = await loadImage('assets/ground.png');
-  const trashCan = await loadImage('assets/trash_can.png'); // Fallback
-  
+  // Use available assets in /public/assets to avoid 404s
+  const ground = await loadImage('/assets/trashbag.jpg');
+  const trashCan = await loadImage('/assets/binlogo.png'); // Fallback
+
   // Misc
-  const introBg = await loadImage('assets/intro_bg.png');
-  const introBgNew = await loadImage('assets/intro_bg_new.png');
-  const ufo = await loadImage('assets/ufo.png');
+  const introBg = await loadImage('/assets/intro_bg_new.png');
+  const introBgNew = await loadImage('/assets/intro_bg_new.png');
+  const ufo = await loadImage('/assets/ufo.png');
 
   // Powerups
-  const incinerator = await loadImage('assets/incinerator.jpg', true);
-  const gorboyConsole = await loadImage('assets/gorboyconsole.png', true);
-  const gorbillions = await loadImage('assets/gorbillions.png', true);
+  const incinerator = await loadImage('/assets/incinerator.jpg', true);
+  const gorboyConsole = await loadImage('/assets/gorboyconsole.png', true);
+  const gorbillions = await loadImage('/assets/gorbillions.png', true);
   
   // Obstacles
   const newObstacle = await loadImage('/game-assets/4.webp', true);
   
   // Decorations (trashbag for side decoration)
-  const trashBagDecor = await loadImage('assets/trashbag.png', true);
+  const trashBagDecor = await loadImage('/assets/trashbag.png', true);
 
   // Points
-  const trashCoin = await loadImage('assets/trashcoin.png', true);
-  const gorbagana = await loadImage('assets/gorbagana.jpg', true);
-  const wallet = await loadImage('assets/wallet.png', true);
+  const trashCoin = await loadImage('/assets/trashcoin.png', true);
+  const gorbagana = await loadImage('/assets/gorbagana.jpg', true);
+  const wallet = await loadImage('/assets/wallet.png', true);
 
   return {
     truck,
