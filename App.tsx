@@ -1,8 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
+import { User, onAuthStateChanged } from 'firebase/auth';
+import { auth } from './utils/firebase';
 import GameRunner from './components/GameRunner';
+import AuthButton from './components/AuthButton';
 import { GameState } from './types';
 import { Settings, X } from 'lucide-react';
+import { saveScoreToFirestore, getUserHighScore } from './utils/scoreManager';
 
 // Helper component for letter-by-letter animation
 const AnimatedText: React.FC<{ text: string; className?: string }> = ({ text, className = '' }) => {
@@ -50,30 +54,65 @@ const App: React.FC = () => {
   const [lives, setLives] = useState(3);
   const [multiplier, setMultiplier] = useState(1);
   const [highScore, setHighScore] = useState(0);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   
   // Settings State
   const [musicVolume, setMusicVolume] = useState(0.5);
   const [sfxVolume, setSfxVolume] = useState(0.5);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // Listen for authentication state changes
   useEffect(() => {
-    const stored = localStorage.getItem('recycleRushHighScore');
-    if (stored) setHighScore(parseInt(stored, 10));
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        // Fetch user's high score from Firestore
+        const userHighScore = await getUserHighScore();
+        setHighScore(userHighScore);
+      } else {
+        // Fallback to localStorage if not authenticated
+        const stored = localStorage.getItem('recycleRushHighScore');
+        if (stored) setHighScore(parseInt(stored, 10));
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const handleGameOver = (finalScore: number) => {
+  const handleGameOver = async (finalScore: number) => {
     if (finalScore > highScore) {
       setHighScore(finalScore);
-      localStorage.setItem('recycleRushHighScore', finalScore.toString());
+      
+      // Save to Firestore if authenticated
+      if (user) {
+        const saved = await saveScoreToFirestore(finalScore);
+        if (saved) {
+          console.log('Score saved to Firestore');
+        }
+      } else {
+        // Fallback to localStorage if not authenticated
+        localStorage.setItem('recycleRushHighScore', finalScore.toString());
+      }
     }
   };
 
   const handleStart = () => {
+    if (!user) {
+      // Show a message or prompt the user to sign in
+      alert('Please sign in with X to save your scores!');
+      return;
+    }
     setGameState(GameState.PLAYING);
     setScore(0);
     setLives(3);
     setMultiplier(1);
     setIsSettingsOpen(false);
+  };
+
+  const handleAuthStateChange = (newUser: User | null) => {
+    setUser(newUser);
   };
 
   return (
@@ -227,12 +266,22 @@ const App: React.FC = () => {
                    </div>
                  </div>
 
+                 {/* Auth Button - Positioned Above Play Button */}
+                 <div className="absolute bottom-48 sm:bottom-52 left-0 right-0 w-full flex flex-col items-center px-6 scroll-fade-in scroll-delay-4">
+                   {loading ? (
+                     <div className="text-gray-400 text-sm font-semibold">Loading...</div>
+                   ) : (
+                     <AuthButton user={user} onAuthStateChange={handleAuthStateChange} />
+                   )}
+                 </div>
+
                  {/* Play Button & Description - Positioned Above Marquee */}
                  <div className="absolute bottom-32 sm:bottom-36 left-0 right-0 w-full flex flex-col items-center space-y-4 px-6 scroll-fade-in scroll-delay-5">
                    {/* Play Button */}
                    <button 
                       onClick={handleStart}
-                      className="w-full max-w-[300px] min-h-touch py-4 sm:py-5 bg-gradient-to-r from-lime-500 via-green-500 to-lime-500 text-black text-lg sm:text-xl md:text-2xl font-black rounded-2xl shadow-[0_0_60px_rgba(132,204,22,0.6)] hover:shadow-[0_0_90px_rgba(132,204,22,0.8)] transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3 uppercase tracking-wider relative overflow-hidden group pill-button btn-beam"
+                      disabled={!user}
+                      className="w-full max-w-[300px] min-h-touch py-4 sm:py-5 bg-gradient-to-r from-lime-500 via-green-500 to-lime-500 text-black text-lg sm:text-xl md:text-2xl font-black rounded-2xl shadow-[0_0_60px_rgba(132,204,22,0.6)] hover:shadow-[0_0_90px_rgba(132,204,22,0.8)] transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3 uppercase tracking-wider relative overflow-hidden group pill-button btn-beam disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 sm:w-7 sm:h-7 relative z-10" viewBox="0 0 24 24" fill="currentColor" stroke="none">
@@ -243,7 +292,7 @@ const App: React.FC = () => {
 
                     {/* Description */}
                     <p className="text-gray-400 text-base sm:text-lg md:text-xl font-semibold text-center max-w-sm leading-relaxed px-4">
-                      Drive the gorbage truck & collect trash!
+                      {user ? 'Drive the gorbage truck & collect trash!' : 'Sign in with X to play and save your scores!'}
                     </p>
                  </div>
 
