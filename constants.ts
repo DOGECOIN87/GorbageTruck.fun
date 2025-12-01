@@ -31,8 +31,8 @@ export const INITIAL_SPEED = 16;
 export const MAX_SPEED = 45;
 export const SPEED_INCREMENT = 0.01;
 
-export const SPAWN_DISTANCE = 5000;
-export const RENDER_DISTANCE = 5000;
+export const SPAWN_DISTANCE = 2000; // Reduced from 5000 to make entities visible sooner
+export const RENDER_DISTANCE = 2500;
 
 // Spawn Rates
 export const SPAWN_RATE_INITIAL = 50;
@@ -59,8 +59,8 @@ export const PARTICLE_COUNT_COLLECT = 15;
 export const PARTICLE_COUNT_COLLISION = 20;
 export const SHADOW_OPACITY = 0.5;
 export const BLOOM_STRENGTH = 15;
-export const FOG_START = 3000;
-export const FOG_END = 5000;
+export const FOG_START = 1500; // Adjusted to match new spawn distance
+export const FOG_END = 2500;
 export const FOG_COLOR = '#0f172a';
 
 // Themes

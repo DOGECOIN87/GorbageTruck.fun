@@ -68,14 +68,14 @@ export const loadGameAssets = async (): Promise<GameAssets> => {
   const gorbillions = await loadImage('./assets/gorbillions.png', true);
   
   // Obstacles
-  const newObstacle = await loadImage('./game-assets/4.webp', true);
+  const newObstacle = await loadImage('./game-assets/4.webp', false); // Disabled removeBlackBg for testing
   
   // Stickers/Collectibles (new assets)
-  const stickerpill = await loadImage('./game-assets/stickerpill.webp', true);
-  const sticker3 = await loadImage('./game-assets/sticker3.webp', true);
+  const stickerpill = await loadImage('./game-assets/stickerpill.webp', false); // Disabled removeBlackBg for testing
+  const sticker3 = await loadImage('./game-assets/sticker3.webp', false); // Disabled removeBlackBg for testing
   
   // Decorations (trashbag for side decoration)
-  const trashBagDecor = await loadImage('./assets/trashbag.png', true);
+  const trashBagDecor = await loadImage('./assets/trashbag.png', false); // Disabled removeBlackBg for testing
 
   // Points
   // Try to load new asset first, fall back to old one if it fails

@@ -45,6 +45,7 @@ export interface GameAssets {
   introBg: HTMLImageElement | null;
   introBgNew: HTMLImageElement | null;
   ufo: HTMLImageElement | null; // Background asset now
+  gorbhouseCry: HTMLImageElement | null; // Game over screen
   
   // Powerups (+Health/Ability)
   incinerator: HTMLImageElement | null;
@@ -56,6 +57,10 @@ export interface GameAssets {
   
   // Decorations
   trashBagDecor: HTMLImageElement | null;
+
+  // Collectibles/Stickers
+  stickerpill: HTMLImageElement | null;
+  sticker3: HTMLImageElement | null;
 
   // Points (+Score)
   trashCoin: HTMLImageElement | null;

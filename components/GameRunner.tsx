@@ -554,7 +554,7 @@ const GameRunner: React.FC<GameRunnerProps> = ({
     );
 
     if (!tooClose) {
-      entitiesRef.current.push({
+      const newEntity = {
         id: Date.now() + Math.random(),
         type,
         subtype,
@@ -566,7 +566,8 @@ const GameRunner: React.FC<GameRunnerProps> = ({
         width: dims.w,
         height: dims.h,
         depth: dims.d
-      });
+      };
+      entitiesRef.current.push(newEntity);
     }
   };
 

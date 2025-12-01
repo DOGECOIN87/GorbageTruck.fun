@@ -12,7 +12,10 @@ export default defineConfig(({ mode }) => {
         strictPort: true,
         hmr: {
           clientPort: 3000
-        }
+        },
+        allowedHosts: [
+          '.manusvm.computer'
+        ]
       },
       plugins: [react()],
       define: {
