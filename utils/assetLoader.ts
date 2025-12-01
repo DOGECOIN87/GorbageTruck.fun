@@ -56,7 +56,7 @@ export const loadGameAssets = async (): Promise<GameAssets> => {
   // Misc
   const introBg = await loadImage('./assets/intro_bg_new.png');
   const introBgNew = await loadImage('./assets/intro_bg_new.png');
-  const ufo = await loadImage('./assets/ufo.png');
+  const ufo = await loadImage('./assets/UFO.png');
   const gorbhouseCry = await loadImage('./assets/gorbhouse-cry.png', true); // New asset for game over screen
 
   // Powerups
