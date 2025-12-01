@@ -1348,16 +1348,16 @@ const GameRunner: React.FC<GameRunnerProps> = ({
       }
     }
 
-    // Draw entity
-    if (img) {
-      // Use sprite drawing for image assets
-      drawSprite(ctx, img, e.x, posY, e.z, e.width, e.height);
-    } else {
-      // Fallback to cube drawing if image not available
-      const topColor = LightenColor(color, 20);
-      const darkColor = DarkenColor(color, 20);
-      drawCube(ctx, e.x, posY, e.z, e.width, e.height, e.depth, color, topColor, darkColor);
-    }
+// Draw entity
+	    if (img) {
+	      // Use sprite drawing for image assets
+	      drawSprite(ctx, img, e.x, posY, e.z, e.width, e.height);
+	    } else {
+	      // Fallback to cube drawing if image not available
+	      const topColor = LightenColor(color, 20);
+	      const darkColor = DarkenColor(color, 20);
+	      drawCube(ctx, e.x, posY, e.z, e.width, e.height, e.depth, color, topColor, darkColor);
+	    }
   };
   
   // --- Color Utilities ---
