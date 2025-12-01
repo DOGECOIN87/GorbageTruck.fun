@@ -4,12 +4,31 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+:root {
+  --app-height: 100%;
+}
+
+/* Mobile viewport bug fix */
+@supports (-webkit-touch-callout: none) {
+  .h-\[100dvh\] {
+    height: var(--app-height);
+  }
+}
+
+html, body {
   margin: 0;
+  padding: 0;
   overflow: hidden;
   background-color: #000000;
-  touch-action: none;
+  touch-action: manipulation; /* Better touch behavior on mobile */
   font-family: 'Montserrat', sans-serif;
+  width: 100%;
+  height: 100%;
+}
+
+/* For better tap target accessibility */
+button, a {
+  touch-action: manipulation;
 }
 
 /* ===== SAFE AREA UTILITIES ===== */
@@ -236,6 +255,7 @@ body {
   position: relative;
   overflow: hidden;
   width: 100%;
+  max-width: 100vw;
 }
 
 .marquee-content {
@@ -282,8 +302,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 clamp(1rem, 3vw, 2rem);
+  padding: 0 clamp(0.5rem, 3vw, 2rem);
   transition: transform 0.3s ease;
+}
+
+@media (max-width: 480px) {
+  .marquee-item img {
+    height: 16px !important;
+    width: 16px !important;
+  }
 }
 
 .marquee-item:hover {
@@ -417,14 +444,42 @@ body {
 }
 
 /* ===== GLOBAL STYLES ===== */
-body {
-  margin: 0;
-  overflow: hidden;
-  background-color: #000000;
-  touch-action: none;
-  font-family: 'Montserrat', sans-serif;
-}
-
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile */
+}
+
+/* Fix for mobile browsers addressing bar */
+@media (max-width: 767px) {
+  .in-app-height-fix {
+    height: 100dvh !important;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Special styles for in-app browser environments */
+@supports (-webkit-overflow-scrolling: touch) {
+  /* These styles will only apply to iOS devices */
+  .ios-inset-padding {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Fix for iOS full height issues */
+  .ios-full-height {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Apply smaller dimensions for wallet browsers and extension popups */
+@media (max-width: 400px), (max-height: 600px) {
+  .wallet-resize {
+    transform: scale(0.9);
+  }
+  
+  .wallet-padding {
+    padding: 0.5rem !important;
+  }
 }

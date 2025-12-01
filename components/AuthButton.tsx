@@ -51,17 +51,17 @@ const AuthButton: React.FC<AuthButtonProps> = ({ user, onAuthStateChange }) => {
 
   if (user) {
     return (
-      <div className="flex flex-col items-center gap-3 w-full max-w-sm">
-        <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-blue-500/50 w-full text-center">
-          <p className="text-sm text-gray-300 uppercase font-bold tracking-wide mb-1">Signed in as</p>
-          <p className="text-lg font-black text-blue-400">{user.displayName || user.email}</p>
+      <div className="flex flex-col items-center gap-2 sm:gap-3 w-full max-w-[90%] xs:max-w-sm">
+        <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-md px-3 xs:px-4 py-2 xs:py-3 rounded-xl border border-blue-500/50 w-full text-center">
+          <p className="text-xs xs:text-sm text-gray-300 uppercase font-bold tracking-wide mb-0.5 xs:mb-1">Signed in as</p>
+          <p className="text-base xs:text-lg font-black text-blue-400 truncate">{user.displayName || user.email}</p>
         </div>
         <button
           onClick={handleSignOut}
           disabled={loading}
-          className="w-full min-h-touch py-3 bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm border-2 border-red-500/50 hover:border-red-500/80 text-red-400 hover:text-red-300 text-body font-bold rounded-xl transition-all transform hover:scale-105 active:scale-95 uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full min-h-touch py-2.5 xs:py-3 bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm border-2 border-red-500/50 hover:border-red-500/80 text-red-400 hover:text-red-300 text-sm xs:text-base font-bold rounded-xl transition-all transform hover:scale-105 active:scale-95 uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
           {loading ? 'Signing out...' : 'Sign Out'}
         </button>
       </div>
@@ -69,18 +69,18 @@ const AuthButton: React.FC<AuthButtonProps> = ({ user, onAuthStateChange }) => {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 w-full max-w-[300px]">
+    <div className="flex flex-col items-center gap-2 sm:gap-3 w-full max-w-[90%] xs:max-w-[300px]">
       <button
         onClick={handleSignIn}
         disabled={loading}
-        className="w-full min-h-touch py-4 sm:py-5 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 text-white text-lg sm:text-xl font-black rounded-2xl shadow-[0_0_40px_rgba(59,130,246,0.5)] hover:shadow-[0_0_70px_rgba(59,130,246,0.7)] transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3 uppercase tracking-wider relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full min-h-touch py-3 xs:py-4 sm:py-5 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 text-white text-base xs:text-lg sm:text-xl font-black rounded-2xl shadow-[0_0_40px_rgba(59,130,246,0.5)] hover:shadow-[0_0_70px_rgba(59,130,246,0.7)] transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 xs:gap-3 uppercase tracking-wider relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-        <LogIn className="w-5 h-5 relative z-10" />
+        <LogIn className="w-4 h-4 xs:w-5 xs:h-5 relative z-10" />
         <span className="relative z-10">{loading ? 'Signing in...' : 'Sign in with X'}</span>
       </button>
       {error && (
-        <p className="text-red-400 text-sm text-center font-semibold">{error}</p>
+        <p className="text-red-400 text-xs xs:text-sm text-center font-semibold">{error}</p>
       )}
     </div>
   );

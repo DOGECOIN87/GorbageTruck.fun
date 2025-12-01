@@ -1274,4 +1274,381 @@ const GameRunner: React.FC<GameRunnerProps> = ({
             ctx.lineTo(hlEnd1_R.x, hlEnd1_R.y);
             ctx.lineTo(hlEnd2_R.x, hlEnd2_R.y);
             ctx.fill();
-            ctx.
+            ctx.restore();
+            
+            // Lamp glare
+            ctx.save();
+            ctx.translate(hlStart_R.x, hlStart_R.y);
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 25;
+            ctx.beginPath();
+            ctx.arc(0, 0, 10 * hlStart_R.scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+  };
+
+  // --- Entity Rendering ---
+  
+  const drawEntity = (ctx: CanvasRenderingContext2D, e: Entity) => {
+    if (e.collected) return;
+    
+    const assets = assetsRef.current;
+    if (!assets) return;
+
+    // Position adjusted for jumping
+    const posY = e.y;
+    
+    // Choose appropriate asset based on entity type and subtype
+    let img: HTMLImageElement | null = null;
+    let color = '#FF0000'; // Fallback color for geometric rendering
+    
+    if (e.type === EntityType.COLLECTIBLE) {
+      if (e.subtype === 'TRASH_COIN') {
+        img = assets.trashCoin;
+        color = '#FFD700'; // Gold color for coins
+      } else if (e.subtype === 'GORBAGANA') {
+        img = assets.gorbagana;
+        color = '#FFC107'; // Yellow for banana
+      } else if (e.subtype === 'WALLET') {
+        img = assets.wallet;
+        color = '#795548'; // Brown for wallet
+      }
+    } else if (e.type === EntityType.OBSTACLE) {
+      if (e.subtype === 'TRASH_BAG') {
+        img = assets.trashBagDecor;
+        color = '#444444'; // Dark gray for trash bag
+      } else {
+        img = assets.newObstacle || assets.trashBagDecor;
+        color = '#222222';
+      }
+    } else if (e.type === EntityType.POWERUP) {
+      if (e.subtype === 'GOR_INCINERATOR') {
+        img = assets.incinerator;
+        color = '#FF5722'; // Orange/red for fire
+      } else if (e.subtype === 'GORBOY_CONSOLE') {
+        img = assets.gorboyConsole;
+        color = '#8BC34A'; // Green for jump
+      } else if (e.subtype === 'GORBILLIONS') {
+        img = assets.gorbillions;
+        color = '#E91E63'; // Pink for health
+      }
+    }
+
+    // Draw entity
+    if (img) {
+      // Use sprite drawing for image assets
+      drawSprite(ctx, img, e.x, posY, e.z, e.width, e.height);
+    } else {
+      // Fallback to cube drawing if image not available
+      const topColor = LightenColor(color, 20);
+      const darkColor = DarkenColor(color, 20);
+      drawCube(ctx, e.x, posY, e.z, e.width, e.height, e.depth, color, topColor, darkColor);
+    }
+  };
+  
+  // --- Color Utilities ---
+  
+  const LightenColor = (color: string, percent: number): string => {
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    
+    const amount = percent / 100;
+    const nr = Math.min(255, Math.floor(r + (255 - r) * amount));
+    const ng = Math.min(255, Math.floor(g + (255 - g) * amount));
+    const nb = Math.min(255, Math.floor(b + (255 - b) * amount));
+    
+    return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
+  };
+
+  const DarkenColor = (color: string, percent: number): string => {
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    
+    const amount = percent / 100;
+    const nr = Math.max(0, Math.floor(r * (1 - amount)));
+    const ng = Math.max(0, Math.floor(g * (1 - amount)));
+    const nb = Math.max(0, Math.floor(b * (1 - amount)));
+    
+    return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
+  };
+
+  // --- Input Handling ---
+  
+  const handleLaneChange = (direction: 'left' | 'right') => {
+    const isTwoLane = twoLaneTimerRef.current > 0;
+    const currentLane = playerRef.current.lane;
+    
+    // Adjust target based on number of lanes
+    let targetLane = currentLane;
+    
+    if (direction === 'left') {
+      // In 2-lane mode, only allow lane 0 and 1
+      if (isTwoLane) {
+        targetLane = Math.max(0, currentLane - 1);
+      } else {
+        // In 3-lane mode, allow lanes 0, 1, 2
+        targetLane = Math.max(0, currentLane - 1);
+      }
+    } else { // right
+      if (isTwoLane) {
+        targetLane = Math.min(1, currentLane + 1);
+      } else {
+        targetLane = Math.min(2, currentLane + 1);
+      }
+    }
+    
+    // Don't do anything if lane hasn't changed
+    if (targetLane === currentLane) return;
+    
+    // Update lane and target X position
+    playerRef.current.lane = targetLane;
+    const positions = isTwoLane ? LANE_X_POSITIONS_2 : LANE_X_POSITIONS;
+    playerRef.current.x = positions[targetLane];
+  };
+
+  const handleJump = () => {
+    if (jumpPowerupTimerRef.current > 0 && !isJumpingRef.current) {
+      isJumpingRef.current = true;
+      jumpVelocityRef.current = 15; // Initial upward velocity
+      playSound('speedup');
+    }
+  };
+
+  const updateJumpState = () => {
+    if (jumpPowerupTimerRef.current > 0) {
+      jumpPowerupTimerRef.current--;
+    }
+    
+    if (isJumpingRef.current) {
+      // Apply gravity
+      jumpVelocityRef.current -= 0.8;
+      
+      // Update y position
+      jumpYRef.current += jumpVelocityRef.current;
+      
+      // Check landing
+      if (jumpYRef.current <= 0) {
+        jumpYRef.current = 0;
+        jumpVelocityRef.current = 0;
+        isJumpingRef.current = false;
+      }
+    }
+    
+    // Always apply jump y offset to player
+    playerRef.current.y = jumpYRef.current;
+  };
+
+  // --- Game Updates ---
+  
+  const updateGame = () => {
+    // Check if game is actually playing
+    if (gameState !== GameState.PLAYING) return;
+    
+    // Update jump state
+    updateJumpState();
+    
+    // Update player position smoothly if needed
+    
+    // Update game speed over time
+    gameSpeedRef.current = Math.min(
+      MAX_SPEED,
+      gameSpeedRef.current + SPEED_INCREMENT
+    );
+    
+    // Check if we hit a speed milestone to increase difficulty
+    if (gameSpeedRef.current >= speedMilestoneRef.current + 5) {
+      speedMilestoneRef.current = gameSpeedRef.current;
+      playSound('speedup');
+    }
+    
+    // Update powerup timers
+    if (incineratorTimerRef.current > 0) {
+      incineratorTimerRef.current -= 1;
+    }
+    
+    if (twoLaneTimerRef.current > 0) {
+      twoLaneTimerRef.current -= 1;
+      
+      // If timer just expired, ensure player is in a valid lane
+      if (twoLaneTimerRef.current === 0 && playerRef.current.lane > 1) {
+        playerRef.current.lane = 1;
+        playerRef.current.x = LANE_X_POSITIONS[1]; // Center
+      }
+    }
+    
+    if (shakeRef.current > 0) {
+      shakeRef.current -= 1;
+    }
+    
+    // Update entities (movement)
+    entitiesRef.current.forEach(e => {
+      if (!e.collected) {
+        e.z -= gameSpeedRef.current;
+      }
+    });
+    
+    // Clean up passed entities
+    entitiesRef.current = entitiesRef.current.filter(
+      e => e.z > -CAMERA_DISTANCE || e.collected
+    );
+    
+    // Spawn logic
+    spawnTimerRef.current += 1;
+    
+    // Calculate dynamic spawn rate (faster game = less frequent spawns to avoid overcrowding)
+    const spawnRate = Math.max(
+      MIN_SPAWN_RATE,
+      SPAWN_RATE_INITIAL - (gameSpeedRef.current - INITIAL_SPEED) / 2
+    );
+    
+    if (spawnTimerRef.current >= spawnRate) {
+      spawnEntity();
+      spawnTimerRef.current = 0;
+    }
+    
+    // Check collisions
+    checkCollisions();
+    
+    // Update particles
+    updateParticles();
+  };
+
+  // --- Animation Loop ---
+  
+  const animate = useCallback(() => {
+    if (!canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Update game state
+    updateGame();
+    
+    // Run music scheduler
+    runMusicScheduler();
+    
+    // Render game
+    draw(ctx);
+    
+    // Schedule next frame
+    requestRef.current = requestAnimationFrame(animate);
+  }, []);
+
+  // --- Key Event Handlers ---
+  
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (gameState !== GameState.PLAYING) return;
+    
+    if (e.code === 'ArrowLeft') {
+      handleLaneChange('left');
+    } else if (e.code === 'ArrowRight') {
+      handleLaneChange('right');
+    } else if (e.code === 'Space') {
+      handleJump();
+    }
+  }, [gameState]);
+
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    if (gameState !== GameState.PLAYING) return;
+    
+    const touch = e.touches[0];
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY
+    };
+  }, [gameState]);
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (gameState !== GameState.PLAYING || !touchStartRef.current) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touchStartRef.current.y - touch.clientY;
+    
+    // Swipe detection
+    if (Math.abs(deltaX) > 50) {
+      if (deltaX > 0) {
+        handleLaneChange('right');
+      } else {
+        handleLaneChange('left');
+      }
+    }
+    
+    // Swipe up (jump)
+    if (deltaY > 50) {
+      handleJump();
+    }
+    
+    touchStartRef.current = null;
+  }, [gameState]);
+
+  // --- Setup & Cleanup ---
+  
+  useEffect(() => {
+    // Start/stop game loop based on game state
+    if (gameState === GameState.PLAYING) {
+      if (!requestRef.current) {
+        resetGame();
+        requestRef.current = requestAnimationFrame(animate);
+      }
+    } else {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = null;
+      }
+    }
+    
+    // Setup event listeners
+    window.addEventListener('keydown', handleKeyDown);
+    
+    if (canvasRef.current) {
+      canvasRef.current.addEventListener('touchstart', handleTouchStart as any);
+      canvasRef.current.addEventListener('touchend', handleTouchEnd as any);
+    }
+    
+    // Cleanup
+    return () => {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
+      window.removeEventListener('keydown', handleKeyDown);
+      
+      if (canvasRef.current) {
+        canvasRef.current.removeEventListener('touchstart', handleTouchStart as any);
+        canvasRef.current.removeEventListener('touchend', handleTouchEnd as any);
+      }
+    };
+  }, [gameState, animate, handleKeyDown, handleTouchStart, handleTouchEnd, resetGame]);
+
+  // --- Component Rendering ---
+  
+  return (
+    <canvas
+      ref={canvasRef}
+      width={CANVAS_WIDTH}
+      height={CANVAS_HEIGHT}
+      className="game-canvas"
+      style={{
+        maxWidth: '100%',
+        maxHeight: '100%',
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+        margin: '0 auto',
+        display: 'block',
+        touchAction: 'none'
+      }}
+    />
+  );
+};
+
+export default GameRunner;

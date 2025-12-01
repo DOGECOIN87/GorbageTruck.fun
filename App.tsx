@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { auth, twitterProvider } from './utils/firebase';
 import GameRunner from './components/GameRunner';
@@ -60,6 +60,22 @@ const App: React.FC = () => {
   const [musicVolume, setMusicVolume] = useState(0.5);
   const [sfxVolume, setSfxVolume] = useState(0.5);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Mobile viewport height fix
+  useLayoutEffect(() => {
+    // First we get the viewport height and we multiply it by 1% to get a value for a vh unit
+    const vh = window.innerHeight * 0.01;
+    // Then we set the value in the --app-height custom property to the root of the document
+    document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+
+    const handleResize = () => {
+      // We execute the same script as before
+      document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Listen for authentication state changes
   useEffect(() => {
@@ -130,9 +146,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-[100dvh] bg-black overflow-hidden font-sans select-none flex justify-center items-center">
+    <div className="relative w-full h-[100dvh] bg-black overflow-hidden font-sans select-none flex justify-center items-center ios-inset-padding in-app-height-fix">
       
-      <div className="relative w-full h-full max-w-lg aspect-[2/3] bg-gray-900 shadow-2xl overflow-hidden border-0 md:border-2 border-[#14F195]/20 rounded-none md:rounded-3xl">
+      <div className="relative w-full h-full max-h-[100dvh] md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl md:max-h-[85vh] xl:max-h-[90vh] md:aspect-[2/3] bg-gray-900 shadow-2xl overflow-hidden border-0 md:border-2 border-[#14F195]/20 rounded-none md:rounded-3xl wallet-resize">
         <GameRunner 
           gameState={gameState}
           setGameState={setGameState}
@@ -164,10 +180,10 @@ const App: React.FC = () => {
             ></div>
 
             {gameState === GameState.MENU && !isSettingsOpen && (
-              <div className="flex flex-col items-center justify-center w-full h-full max-w-md relative px-6">
+                <div className="flex flex-col items-center justify-center w-full h-full max-w-full relative px-4 sm:px-6">
 
                  {user ? (
-                   <div className="absolute top-6 left-6 flex items-center gap-2 scroll-fade-in scroll-delay-1 z-20">
+                   <div className="absolute top-4 sm:top-6 left-4 sm:left-6 flex items-center gap-2 scroll-fade-in scroll-delay-1 z-20">
                       <img src={user.photoURL || ''} alt={user.displayName || ''} className="w-10 h-10 rounded-full border-2 border-lime-500/50" />
                       <div className="flex flex-col">
                         <span className="text-body-sm font-bold text-white">{user.displayName}</span>
@@ -175,7 +191,7 @@ const App: React.FC = () => {
                       </div>
                    </div>
                  ) : (
-                  <div className="absolute top-6 left-6 flex items-center gap-2 scroll-fade-in scroll-delay-1 z-20">
+                  <div className="absolute top-4 sm:top-6 left-4 sm:left-6 flex items-center gap-2 scroll-fade-in scroll-delay-1 z-20">
                     <div className="flex items-center gap-2 bg-gradient-to-br from-lime-500/20 to-green-500/20 backdrop-blur-md px-3 py-1.5 rounded-full border-2 border-lime-500/50 shadow-[0_0_25px_rgba(132,204,22,0.4)]">
                       <span className="text-base">🏆</span>
                       <div className="flex flex-col">
@@ -188,23 +204,23 @@ const App: React.FC = () => {
 
                  <button 
                    onClick={() => setIsSettingsOpen(true)}
-                   className="absolute top-6 right-6 min-w-touch min-h-touch p-2.5 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 text-white/70 hover:text-lime-400 hover:border-lime-400/50 transition-all hover:scale-110 scroll-fade-in scroll-delay-1 z-20"
+                   className="absolute top-4 sm:top-6 right-4 sm:right-6 min-w-touch min-h-touch p-2.5 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 text-white/70 hover:text-lime-400 hover:border-lime-400/50 transition-all hover:scale-110 scroll-fade-in scroll-delay-1 z-20"
                    aria-label="Settings"
                  >
                    <Settings className="w-5 h-5" />
                  </button>
 
                  <div className="flex flex-col items-center w-full">
-                   <div className="relative scroll-blur-in scroll-delay-2 -mt-[20rem]">
+                   <div className="relative scroll-blur-in scroll-delay-2 -mt-[10rem] sm:-mt-[15rem] md:-mt-[20rem]">
                       <div className="absolute -inset-10 bg-gradient-to-r from-lime-500 via-orange-500 to-lime-500 opacity-30 blur-3xl rounded-full animate-pulse"></div>
                       <h1 className="relative text-center">
-                        <span className="block text-[4.5rem] sm:text-[5.5rem] md:text-[6.5rem] font-black tracking-tight leading-none text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] animate-float" style={{
+                        <span className="block text-[3rem] xs:text-[3.5rem] sm:text-[4.5rem] md:text-[5.5rem] lg:text-[6rem] font-black tracking-tight leading-none text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] animate-float" style={{
                           textShadow: '0 0 40px rgba(132, 204, 22, 0.8), 0 0 80px rgba(249, 115, 22, 0.6)',
                         }}>
                           <AnimatedText text="GORBAGE" />
                         </span>
                         
-                        <span className="block text-[2rem] sm:text-[2.5rem] md:text-[3rem] font-black leading-none text-lime-400 -mt-1" style={{
+                        <span className="block text-[1.5rem] xs:text-[1.8rem] sm:text-[2.2rem] md:text-[2.5rem] lg:text-[3rem] font-black leading-none text-lime-400 -mt-1" style={{
                           filter: 'drop-shadow(0 0 20px rgba(132, 204, 22, 0.9))',
                           letterSpacing: '0.35em',
                           paddingLeft: '0.35em'
@@ -219,7 +235,7 @@ const App: React.FC = () => {
                    </div>
                  </div>
 
-                 <div className="absolute bottom-56 sm:bottom-60 left-0 right-0 w-full flex flex-col items-center px-6 scroll-fade-in scroll-delay-4">
+                 <div className="absolute bottom-52 xs:bottom-56 sm:bottom-60 left-0 right-0 w-full flex flex-col items-center px-4 sm:px-6 scroll-fade-in scroll-delay-4">
                    {loading ? (
                      <div className="text-gray-400 text-sm font-semibold">Loading...</div>
                    ) : (
@@ -227,10 +243,10 @@ const App: React.FC = () => {
                    )}
                  </div>
 
-                 <div className="absolute bottom-24 sm:bottom-28 left-0 right-0 w-full flex flex-col items-center space-y-4 px-6 scroll-fade-in scroll-delay-5">
+                 <div className="absolute bottom-20 xs:bottom-24 sm:bottom-28 left-0 right-0 w-full flex flex-col items-center space-y-3 sm:space-y-4 px-4 sm:px-6 scroll-fade-in scroll-delay-5">
                     <button 
                       onClick={handleStart}
-                      className="w-full max-w-[300px] min-h-touch py-4 sm:py-5 bg-gradient-to-r from-lime-500 via-green-500 to-lime-500 text-black text-lg sm:text-xl md:text-2xl font-black rounded-2xl shadow-[0_0_60px_rgba(132,204,22,0.6)] hover:shadow-[0_0_90px_rgba(132,204,22,0.8)] transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3 uppercase tracking-wider relative overflow-hidden group pill-button btn-beam"
+                      className="w-full max-w-[90%] xs:max-w-[300px] min-h-touch py-3 xs:py-4 sm:py-5 bg-gradient-to-r from-lime-500 via-green-500 to-lime-500 text-black text-base sm:text-lg md:text-xl lg:text-2xl font-black rounded-2xl shadow-[0_0_60px_rgba(132,204,22,0.6)] hover:shadow-[0_0_90px_rgba(132,204,22,0.8)] transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 sm:gap-3 uppercase tracking-wider relative overflow-hidden group pill-button btn-beam"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 sm:w-7 sm:h-7 relative z-10" viewBox="0 0 24 24" fill="currentColor" stroke="none">
@@ -239,12 +255,12 @@ const App: React.FC = () => {
                       <span className="relative z-10">Play Now</span>
                     </button>
 
-                    <p className="text-gray-400 text-base sm:text-lg md:text-xl font-semibold text-center max-w-sm leading-relaxed px-4">
+                    <p className="text-gray-400 text-sm xs:text-base sm:text-lg md:text-xl font-semibold text-center max-w-xs sm:max-w-sm leading-relaxed px-2 sm:px-4">
                       {user ? 'Drive the gorbage truck & collect trash!' : 'Sign in with X to save your scores online! (optional)'}
                     </p>
                  </div>
 
-                 <div className="absolute bottom-0 left-0 right-0 w-full scroll-fade-in scroll-delay-7">
+                 <div className="absolute bottom-0 left-0 right-0 w-full scroll-fade-in scroll-delay-7 overflow-hidden">
                    <LogoMarquee />
                  </div>
               </div>
@@ -252,13 +268,13 @@ const App: React.FC = () => {
 
             {isSettingsOpen && (
                <div className="absolute inset-0 z-40 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-8 safe-area-inset animate-in fade-in duration-300">
-                  <div className="w-full max-w-sm bg-gray-900 border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl relative">
+                  <div className="w-full max-w-[90%] xs:max-w-sm bg-gray-900 border border-white/10 rounded-3xl p-4 xs:p-5 sm:p-6 shadow-2xl relative">
                      <button 
                         onClick={() => setIsSettingsOpen(false)}
                         className="absolute top-3 right-3 sm:top-4 sm:right-4 min-w-touch min-h-touch p-2 text-gray-400 hover:text-white transition-colors"
                         aria-label="Close"
                      >
-                       <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                       <X className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6" />
                      </button>
                      
                      <h2 className="text-h2 font-black text-center mb-6 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-lime-400 to-orange-400">

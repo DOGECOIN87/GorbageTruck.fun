@@ -10,7 +10,7 @@ export enum EntityType {
   POWERUP = 'POWERUP',
 }
 
-export type CollectibleSubtype = 'TRASH_COIN' | 'GORBAGANA' | 'WALLET' | 'GENERIC_POINT';
+export type CollectibleSubtype = 'TRASH_COIN' | 'GORBAGANA' | 'WALLET' | 'STICKERPILL' | 'STICKER3' | 'GENERIC_POINT';
 export type ObstacleSubtype = 'TRASH_BAG';
 export type PowerupSubtype = 'GOR_INCINERATOR' | 'GORBOY_CONSOLE' | 'GORBILLIONS';
 

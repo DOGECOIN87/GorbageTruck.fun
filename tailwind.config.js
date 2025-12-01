@@ -7,6 +7,14 @@ export default {
     './components/**/*.{ts,tsx,jsx,js}',
   ],
   theme: {
+    screens: {
+      'xs': '480px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       fontSize: {
         // Typography hierarchy
@@ -39,6 +47,9 @@ export default {
       },
       minWidth: {
         'touch': '44px',
+      },
+      height: {
+        'screen-safe': '100dvh',
       },
     },
   },

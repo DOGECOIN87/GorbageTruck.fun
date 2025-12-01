@@ -57,22 +57,33 @@ export const loadGameAssets = async (): Promise<GameAssets> => {
   const introBg = await loadImage('/assets/intro_bg_new.png');
   const introBgNew = await loadImage('/assets/intro_bg_new.png');
   const ufo = await loadImage('/assets/ufo.png');
+  const gorbhouseCry = await loadImage('/game-assets/gorbhouse-cry.png', true); // New asset for game over screen
 
   // Powerups
-  const incinerator = await loadImage('/assets/incinerator.jpg', true);
-  const gorboyConsole = await loadImage('/assets/gorboyconsole.png', true);
+  // Try to load new asset first, fall back to old one if it fails
+  const incinerator = await loadImage('/game-assets/Logo-gor-incinerator.jpg', true) || 
+                     await loadImage('/assets/incinerator.jpg', true);
+  const gorboyConsole = await loadImage('/game-assets/Gorboyconsole.png', true) || 
+                       await loadImage('/assets/gorboyconsole.png', true);
   const gorbillions = await loadImage('/assets/gorbillions.png', true);
   
   // Obstacles
   const newObstacle = await loadImage('/game-assets/4.webp', true);
   
+  // Stickers/Collectibles (new assets)
+  const stickerpill = await loadImage('/game-assets/stickerpill.webp', true);
+  const sticker3 = await loadImage('/game-assets/sticker3.webp', true);
+  
   // Decorations (trashbag for side decoration)
   const trashBagDecor = await loadImage('/assets/trashbag.png', true);
 
   // Points
-  const trashCoin = await loadImage('/assets/trashcoin.png', true);
+  // Try to load new asset first, fall back to old one if it fails
+  const trashCoin = await loadImage('/game-assets/trashcoinlogo.png', true) || 
+                   await loadImage('/assets/trashcoin.png', true);
   const gorbagana = await loadImage('/assets/gorbagana.jpg', true);
-  const wallet = await loadImage('/assets/wallet.png', true);
+  const wallet = await loadImage('/game-assets/gorbagwallet-removebg-preview.png', true) || 
+                await loadImage('/assets/wallet.png', true);
 
   return {
     truck,
@@ -80,6 +91,7 @@ export const loadGameAssets = async (): Promise<GameAssets> => {
     introBg,
     introBgNew,
     ufo,
+    gorbhouseCry,
     
     // Powerups
     incinerator,
@@ -91,6 +103,8 @@ export const loadGameAssets = async (): Promise<GameAssets> => {
     
     // Decorations
     trashBagDecor,
+    stickerpill,
+    sticker3,
 
     // Points
     trashCoin,
