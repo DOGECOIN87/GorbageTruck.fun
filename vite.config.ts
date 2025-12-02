@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => {
           clientPort: 3000
         },
         allowedHosts: [
-          '.manusvm.computer'
+          '.manusvm.computer',
+          '*.manus.computer'
         ]
       },
       plugins: [react()],
